@@ -87,7 +87,7 @@ if st.button("Generate Sketch"):
                     try:
                         # Create sketch generation request with enhanced prompt
                         params = {
-                            "text": f"black and white sketch, minimal lines, artistic drawing style: {enhanced_prompt}",
+                            "prompt": f"black and white sketch, minimal lines, artistic drawing style: {enhanced_prompt}",
                             "style": style_options[selected_style],
                             "artistic_style": "sketch",
                             "color_scheme": "monochrome"
