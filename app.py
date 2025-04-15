@@ -87,10 +87,12 @@ if st.button("Generate Sketch"):
                     try:
                         # Create sketch generation request with enhanced prompt
                         params = {
-                            "prompt": f"black and white sketch: {enhanced_prompt}",
-                            "style": style_options[selected_style],
                             "count": 1,
-                            "orientation": "landscape"
+                            "orientation": "landscape",
+                            "style": {
+                                "name": style_options[selected_style],
+                                "prompt": f"black and white sketch: {enhanced_prompt}"
+                            }
                         }
                         create_res = client.v1.ai_image_generator.create(**params)
 
