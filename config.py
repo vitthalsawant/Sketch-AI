@@ -1,0 +1,3 @@
+# config.py
+GEMINI_API_KEY = "AIzaSyBGagsTXH6uDxTXOIfrMBdYpwMykElrVrA"
+MAGIC_HOUR_API_KEY = "mhk_live_ZLwhbD3vBem7rgwWUnNCyRyYEQcVe7dhTqiqsW6sb2weecsyVp1ZjUHdexLXH5RmjwmHv14wIhzJEsDx"
