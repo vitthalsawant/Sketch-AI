@@ -87,12 +87,10 @@ if st.button("Generate Sketch"):
                     try:
                         # Create sketch generation request with enhanced prompt
                         create_res = client.v1.ai_image_generator.create(
-                            style={
-                                "prompt": f"black and white sketch, minimal lines, artistic drawing style: {enhanced_prompt}",
-                                "style": style_options[selected_style],
-                                "artistic_style": "sketch",
-                                "color_scheme": "monochrome"
-                            },
+                            prompt=f"black and white sketch, minimal lines, artistic drawing style: {enhanced_prompt}",
+                            style=style_options[selected_style],
+                            artistic_style="sketch",
+                            color_scheme="monochrome"
                         )
 
                         # Poll for completion
