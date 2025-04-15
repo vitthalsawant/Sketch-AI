@@ -87,8 +87,6 @@ if st.button("Generate Sketch"):
                     try:
                         # Create sketch generation request with enhanced prompt
                         params = {
-                            "count": 1,
-                            "orientation": "landscape",
                             "style": {
                                 "name": style_options[selected_style],
                                 "prompt": f"black and white sketch: {enhanced_prompt}"
