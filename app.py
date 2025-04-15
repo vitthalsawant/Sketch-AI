@@ -90,10 +90,7 @@ if st.button("Generate Sketch"):
                             "image_count": 1,
                             "orientation": "landscape",
                             "style": {
-                                "prompt": f"black and white sketch, minimal lines, artistic drawing style: {enhanced_prompt}",
-                                "style": style_options[selected_style],
-                                "artistic_style": "sketch",
-                                "color_scheme": "monochrome"
+                                "prompt": f"black and white sketch: {enhanced_prompt}"
                             }
                         }
                         create_res = client.v1.ai_image_generator.create(**params)
