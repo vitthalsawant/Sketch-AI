@@ -86,12 +86,13 @@ if st.button("Generate Sketch"):
                 with st.spinner("Creating your artistic sketch..."):
                     try:
                         # Create sketch generation request with enhanced prompt
-                        create_res = client.v1.ai_image_generator.create(
-                            prompt=f"black and white sketch, minimal lines, artistic drawing style: {enhanced_prompt}",
-                            style=style_options[selected_style],
-                            artistic_style="sketch",
-                            color_scheme="monochrome"
-                        )
+                        params = {
+                            "text": f"black and white sketch, minimal lines, artistic drawing style: {enhanced_prompt}",
+                            "style": style_options[selected_style],
+                            "artistic_style": "sketch",
+                            "color_scheme": "monochrome"
+                        }
+                        create_res = client.v1.ai_image_generator.create(**params)
 
                         # Poll for completion
                         progress_bar = st.progress(0)
