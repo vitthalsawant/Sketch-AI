@@ -4,6 +4,8 @@ from magic_hour import Client
 import time
 from dotenv import load_dotenv
 import google.generativeai as genai
+import urllib.request
+import tempfile
 
 # Load environment variables
 load_dotenv()
@@ -23,7 +25,7 @@ if not MAGIC_HOUR_API_KEY:
 
 client = Client(token=MAGIC_HOUR_API_KEY)
 
-# Set default parameters for the model
+# Set default parameters for the Gemini model
 generation_config = {
     "temperature": 0.7,
     "top_p": 1,
@@ -74,6 +76,14 @@ style_options = {
 }
 selected_style = st.selectbox("Choose your art style:", options=list(style_options.keys()))
 
+# Orientation options
+orientation_options = {
+    "Landscape": "landscape",
+    "Portrait": "portrait",
+    "Square": "square"
+}
+selected_orientation = st.selectbox("Choose orientation:", options=list(orientation_options.keys()))
+
 # Generate sketch based on prompt
 if st.button("Generate Sketch"):
     if user_prompt.strip():
@@ -86,14 +96,16 @@ if st.button("Generate Sketch"):
                 with st.spinner("Creating your artistic sketch..."):
                     try:
                         # Create sketch generation request with enhanced prompt
-                        params = {
-                            "style": {
-                                "name": style_options[selected_style],
+                        create_res = client.v1.ai_image_generator.create(
+                            image_count=1,
+                            orientation=orientation_options[selected_orientation],
+                            style={
                                 "prompt": f"black and white sketch: {enhanced_prompt}"
                             }
-                        }
-                        create_res = client.v1.ai_image_generator.create(**params)
-
+                        )
+                        
+                        st.info(f"Queued image with id {create_res.id}, spent {create_res.frame_cost} frames")
+                        
                         # Poll for completion
                         progress_bar = st.progress(0)
                         status_text = st.empty()
@@ -104,11 +116,24 @@ if st.button("Generate Sketch"):
                             if res.status == "complete":
                                 progress_bar.progress(100)
                                 if res.downloads and len(res.downloads) > 0:
-                                    st.image(res.downloads[0].url, caption="Your Generated Sketch")
+                                    # Download the image to a temporary file
+                                    with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_file:
+                                        with urllib.request.urlopen(res.downloads[0].url) as response:
+                                            temp_file.write(response.read())
+                                        temp_file_path = temp_file.name
+                                    
+                                    # Display the image
+                                    st.image(temp_file_path, caption="Your Generated Sketch")
                                     st.success("✨ Sketch created successfully!")
                                     
                                     # Add download button
-                                    st.markdown(f"[Download Sketch]({res.downloads[0].url})")
+                                    with open(temp_file_path, "rb") as file:
+                                        st.download_button(
+                                            label="Download Sketch",
+                                            data=file,
+                                            file_name="generated_sketch.png",
+                                            mime="image/png"
+                                        )
                                 break
                             elif res.status == "error":
                                 progress_bar.empty()
@@ -131,7 +156,7 @@ if st.button("Generate Sketch"):
                             3. Contact support for assistance
                             """)
                         else:
-                            raise e
+                            st.error(f"An error occurred during sketch generation: {str(e)}")
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
