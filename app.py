@@ -10,22 +10,20 @@ import tempfile
 # Load environment variables
 load_dotenv()
 
-# Configure Gemini API
+# API keys setup
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
-if not GOOGLE_API_KEY:
-    st.error("API key not found. Please check your .env file.")
-    st.stop()
-genai.configure(api_key=GOOGLE_API_KEY)
-
-# Configure Magic Hour Client
 MAGIC_HOUR_API_KEY = os.getenv('MAGIC_HOUR_API_KEY')
-if not MAGIC_HOUR_API_KEY:
-    st.error("Magic Hour API key not found. Please check your .env file.")
+
+# Check API keys and stop execution if they're missing
+if not GOOGLE_API_KEY or not MAGIC_HOUR_API_KEY:
+    st.error("Missing API keys. Please check your .env file.")
     st.stop()
 
+# Configure APIs
+genai.configure(api_key=GOOGLE_API_KEY)
 client = Client(token=MAGIC_HOUR_API_KEY)
 
-# Set default parameters for the Gemini model
+# Default parameters for the Gemini model
 generation_config = {
     "temperature": 0.7,
     "top_p": 1,
@@ -39,33 +37,38 @@ model = genai.GenerativeModel(
     generation_config=generation_config
 )
 
+# Function to enhance the user prompt
 def enhance_prompt(user_prompt):
     try:
-        enhancement_prompt = f"""Enhance this image description to make it more detailed and artistic. 
-        Focus on visual elements, style, and artistic details. Keep it concise but descriptive.
+        enhancement_prompt = f"""
+        Enhance this image description to make it more detailed and artistic.
+        Focus on visual elements, style, and artistic details. 
         Original prompt: {user_prompt}
         
         Enhanced prompt should include:
-        1. Main subject and composition
-        2. Artistic style and mood
-        3. Key visual elements and details
-        4. Lighting and atmosphere
+        - Main subject and composition
+        - Artistic style and mood
+        - Key visual elements and details
+        - Lighting and atmosphere
         
-        Return only the enhanced prompt without any explanations or additional text."""
-        
+        Return only the enhanced prompt without any explanations or additional text.
+        """
         response = model.generate_content(enhancement_prompt)
         return response.text.strip() if response.text else user_prompt
     except Exception as e:
         st.warning(f"Could not enhance prompt: {str(e)}. Using original prompt.")
         return user_prompt
 
-# Initialize the Streamlit app
+# Streamlit app setup
 st.title("AI Sketch Generator")
 st.write("Transform your descriptions into beautiful sketches!")
 
 # Input section for sketch description
-user_prompt = st.text_area("Enter your sketch description:", "", 
-                          help="Describe what you want to sketch. Be as detailed as possible!")
+user_prompt = st.text_area(
+    "Enter your sketch description:",
+    "",
+    help="Describe what you want to sketch. Be as detailed as possible!"
+)
 
 # Style options
 style_options = {
@@ -89,13 +92,13 @@ if st.button("Generate Sketch"):
     if user_prompt.strip():
         try:
             with st.spinner("Enhancing your prompt with AI..."):
-                # Enhance the prompt using Gemini
+                # Enhance the prompt
                 enhanced_prompt = enhance_prompt(user_prompt)
                 st.info("Enhanced prompt: " + enhanced_prompt)
                 
                 with st.spinner("Creating your artistic sketch..."):
                     try:
-                        # Create sketch generation request with enhanced prompt
+                        # Creating sketch generation request
                         create_res = client.v1.ai_image_generator.create(
                             image_count=1,
                             orientation=orientation_options[selected_orientation],
@@ -104,7 +107,7 @@ if st.button("Generate Sketch"):
                             }
                         )
                         
-                        st.info(f"Queued image with id {create_res.id}, spent {create_res.frame_cost} frames")
+                        st.info(f"Queued image with ID: {create_res.id} | Frames used: {create_res.frame_cost}")
                         
                         # Poll for completion
                         progress_bar = st.progress(0)
@@ -140,7 +143,6 @@ if st.button("Generate Sketch"):
                                 st.error("❌ Sketch generation failed")
                                 break
                             else:
-                                # Update progress indication
                                 status_text.text(f"Status: {res.status}")
                                 progress_bar.progress(50)
                                 time.sleep(1)
@@ -148,16 +150,14 @@ if st.button("Generate Sketch"):
                         if "frames" in str(e).lower():
                             st.error("""
                             ⚠️ Insufficient frames to generate sketch!
-                            
-                            Each sketch generation costs 5 frames.
+                            Each sketch generation costs frames.
                             Please visit https://magic.hour/account to:
                             1. Check your current frame balance
-                            2. Upgrade your plan to get more frames
+                            2. Upgrade your plan for more frames
                             3. Contact support for assistance
                             """)
                         else:
-                            st.error(f"An error occurred during sketch generation: {str(e)}")
-
+                            st.error(f"Error during sketch generation: {str(e)}")
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
     else:
