@@ -94,9 +94,11 @@ if st.button("Generate Sketch"):
                 try:
                     # Corrected parameter names for Magic Hour API
                     create_res = client.v1.ai_image_generator.create(
-                        description=f"black and white sketch: {enhanced_prompt}",
+                        image_count=1,
                         orientation=orientation_options[selected_orientation],
-                        style=style_options[selected_style]
+                        style={
+                            "prompt": f"black and white sketch: {enhanced_prompt}"
+                        }
                     )
                     st.info(f"Queued image with ID: {create_res.id} | Frames used: {create_res.frame_cost}")
 
