@@ -94,7 +94,7 @@ if st.button("Generate Sketch"):
                 try:
                     # Corrected parameter names for Magic Hour API
                     create_res = client.v1.ai_image_generator.create(
-                        prompt=f"black and white sketch: {enhanced_prompt}",  # Replaced 'text' with 'prompt'
+                        description=f"black and white sketch: {enhanced_prompt}",  # Replaced 'prompt' with 'description'
                         orientation=orientation_options[selected_orientation],
                         style=style_options[selected_style]
                     )
